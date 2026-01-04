@@ -1,7 +1,7 @@
 const CACHE_NAME = 'car-tracker-v1';
 const urlsToCache = [
     './',
-    './car-tracker.html',
+    './index.html',
     './manifest.json'
 ];
 

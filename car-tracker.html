@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Car Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #252542;
+            --accent: #ff6b35;
+            --accent-glow: rgba(255, 107, 53, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b8;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+        }
+
+        .app {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+
+        /* Header */
+        .header {
+            padding: 20px 20px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 span {
+            font-size: 1.8rem;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            padding: 8px 16px 0;
+            gap: 4px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 8px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--text-primary);
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 16px;
+            padding-bottom: 100px;
+            overflow-y: auto;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Forms */
+        .form-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .form-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-group textarea {
+            font-family: 'Outfit', sans-serif;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--accent);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--accent-glow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Entries List */
+        .entries-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .entry-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .entry-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .entry-card.fuel::before { background: var(--accent); }
+        .entry-card.expense::before { background: var(--warning); }
+        .entry-card.complaint::before { background: var(--danger); }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .entry-type {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .entry-card.fuel .entry-type { background: rgba(255, 107, 53, 0.2); color: var(--accent); }
+        .entry-card.expense .entry-type { background: rgba(251, 191, 36, 0.2); color: var(--warning); }
+        .entry-card.complaint .entry-type { background: rgba(248, 113, 113, 0.2); color: var(--danger); }
+
+        .entry-date {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .entry-main {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .entry-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .entry-note {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .entry-delete {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            background: rgba(248, 113, 113, 0.1);
+            border: none;
+            color: var(--danger);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            opacity: 0.6;
+            transition: all 0.2s ease;
+        }
+
+        .entry-delete:hover {
+            opacity: 1;
+            background: rgba(248, 113, 113, 0.2);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state span {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Summary Section */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .summary-card.wide {
+            grid-column: span 2;
+        }
+
+        .summary-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .summary-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* PWA Install Banner */
+        .install-banner {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 16px;
+            right: 16px;
+            max-width: 448px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 16px;
+            z-index: 200;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .install-banner.show {
+            display: block;
+        }
+
+        .install-banner-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .install-banner-text {
+            flex: 1;
+        }
+
+        .install-banner-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .install-banner-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .install-btn {
+            padding: 10px 16px;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .install-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* Responsive */
+        @media (max-width: 380px) {
+            .stat-value { font-size: 0.95rem; }
+            .form-row { flex-direction: column; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1><span>🚗</span> Car Tracker</h1>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-label">Last KM</div>
+                    <div class="stat-value" id="lastKm">--</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Avg Mileage</div>
+                    <div class="stat-value" id="avgMileage">-- km/L</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total Spent</div>
+                    <div class="stat-value" id="totalSpent">₹0</div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab active" data-tab="fuel">⛽ Fuel</button>
+            <button class="tab" data-tab="expense">💰 Expense</button>
+            <button class="tab" data-tab="complaint">📝 Notes</button>
+            <button class="tab" data-tab="history">📊 All</button>
+        </nav>
+
+        <main class="content">
+            <!-- Fuel Section -->
+            <section id="fuel" class="section active">
+                <div class="form-card">
+                    <div class="form-title">⛽ Add Fuel Entry</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Current KM</label>
+                            <input type="number" id="fuelKm" placeholder="e.g. 45230">
+                        </div>
+                        <div class="form-group">
+                            <label>Liters</label>
+                            <input type="number" id="fuelLiters" step="0.01" placeholder="e.g. 35.5">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Price/Liter</label>
+                            <input type="number" id="fuelPrice" step="0.01" placeholder="e.g. 102.50">
+                        </div>
+                        <div class="form-group">
+                            <label>Total Cost</label>
+                            <input type="number" id="fuelTotal" step="0.01" placeholder="Auto-calc">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="addFuelEntry()">
+                        <span>➕</span> Add Fuel Entry
+                    </button>
+                </div>
+
+                <div class="entries-list" id="fuelList"></div>
+            </section>
+
+            <!-- Expense Section -->
+            <section id="expense" class="section">
+                <div class="form-card">
+                    <div class="form-title">💰 Add Expense</div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Category</label>
+                        <select id="expenseCategory">
+                            <option value="service">🔧 Service/Maintenance</option>
+                            <option value="repair">🛠️ Repair</option>
+                            <option value="insurance">📋 Insurance</option>
+                            <option value="tax">📄 Tax/Registration</option>
+                            <option value="accessories">🎨 Accessories</option>
+                            <option value="parking">🅿️ Parking/Toll</option>
+                            <option value="other">📦 Other</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Amount</label>
+                            <input type="number" id="expenseAmount" step="0.01" placeholder="e.g. 5000">
+                        </div>
+                        <div class="form-group">
+                            <label>KM (Optional)</label>
+                            <input type="number" id="expenseKm" placeholder="Current KM">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Description</label>
+                        <input type="text" id="expenseDesc" placeholder="e.g. Oil change, new tyres...">
+                    </div>
+                    <button class="btn" onclick="addExpenseEntry()">
+                        <span>➕</span> Add Expense
+                    </button>
+                </div>
+
+                <div class="entries-list" id="expenseList"></div>
+            </section>
+
+            <!-- Complaint/Notes Section -->
+            <section id="complaint" class="section">
+                <div class="form-card">
+                    <div class="form-title">📝 Add Note/Complaint</div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Priority</label>
+                        <select id="complaintPriority">
+                            <option value="low">🟢 Low - Just noting</option>
+                            <option value="medium">🟡 Medium - Check soon</option>
+                            <option value="high">🔴 High - Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Current KM</label>
+                        <input type="number" id="complaintKm" placeholder="KM when noticed">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Issue/Note</label>
+                        <textarea id="complaintNote" placeholder="e.g. Strange noise from front wheel, AC not cooling properly..."></textarea>
+                    </div>
+                    <button class="btn" onclick="addComplaintEntry()">
+                        <span>➕</span> Add Note
+                    </button>
+                </div>
+
+                <div class="entries-list" id="complaintList"></div>
+            </section>
+
+            <!-- History/Summary Section -->
+            <section id="history" class="section">
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-icon">⛽</div>
+                        <div class="summary-value" id="sumFuel">₹0</div>
+                        <div class="summary-label">Fuel Expenses</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">🔧</div>
+                        <div class="summary-value" id="sumOther">₹0</div>
+                        <div class="summary-label">Other Expenses</div>
+                    </div>
+                    <div class="summary-card wide">
+                        <div class="summary-icon">📊</div>
+                        <div class="summary-value" id="sumTotal">₹0</div>
+                        <div class="summary-label">Total All Expenses</div>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <div class="form-title">📋 All Entries</div>
+                </div>
+
+                <div class="entries-list" id="allList"></div>
+            </section>
+        </main>
+
+        <div class="install-banner" id="installBanner">
+            <button class="install-close" onclick="dismissInstall()">×</button>
+            <div class="install-banner-content">
+                <span style="font-size: 2rem;">📲</span>
+                <div class="install-banner-text">
+                    <div class="install-banner-title">Install App</div>
+                    <div class="install-banner-desc">Add to home screen for quick access</div>
+                </div>
+                <button class="install-btn" onclick="installPWA()">Install</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // TypeScript-style interfaces (as JSDoc for vanilla JS)
+        /**
+         * @typedef {Object} FuelEntry
+         * @property {string} id
+         * @property {'fuel'} type
+         * @property {number} km
+         * @property {number} liters
+         * @property {number} pricePerLiter
+         * @property {number} total
+         * @property {number} mileage
+         * @property {string} date
+         */
+
+        /**
+         * @typedef {Object} ExpenseEntry
+         * @property {string} id
+         * @property {'expense'} type
+         * @property {string} category
+         * @property {number} amount
+         * @property {number} [km]
+         * @property {string} description
+         * @property {string} date
+         */
+
+        /**
+         * @typedef {Object} ComplaintEntry
+         * @property {string} id
+         * @property {'complaint'} type
+         * @property {string} priority
+         * @property {number} [km]
+         * @property {string} note
+         * @property {string} date
+         */
+
+        // Data Store
+        const STORAGE_KEY = 'carTrackerData';
+
+        function getData() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : { fuel: [], expense: [], complaint: [] };
+        }
+
+        function saveData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-IN', { 
+                day: 'numeric', 
+                month: 'short',
+                year: '2-digit'
+            });
+        }
+
+        function formatCurrency(num) {
+            return '₹' + num.toLocaleString('en-IN');
+        }
+
+        // Tab Navigation
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Auto-calculate fuel total
+        document.getElementById('fuelLiters').addEventListener('input', calcFuelTotal);
+        document.getElementById('fuelPrice').addEventListener('input', calcFuelTotal);
+
+        function calcFuelTotal() {
+            const liters = parseFloat(document.getElementById('fuelLiters').value) || 0;
+            const price = parseFloat(document.getElementById('fuelPrice').value) || 0;
+            if (liters && price) {
+                document.getElementById('fuelTotal').value = (liters * price).toFixed(2);
+            }
+        }
+
+        // Add Entries
+        function addFuelEntry() {
+            const km = parseInt(document.getElementById('fuelKm').value);
+            const liters = parseFloat(document.getElementById('fuelLiters').value);
+            const pricePerLiter = parseFloat(document.getElementById('fuelPrice').value);
+            const total = parseFloat(document.getElementById('fuelTotal').value);
+
+            if (!km || !liters || !total) {
+                alert('Please fill KM, Liters, and Total');
+                return;
+            }
+
+            const data = getData();
+            
+            // Calculate mileage based on previous entry
+            let mileage = 0;
+            if (data.fuel.length > 0) {
+                const lastEntry = data.fuel[data.fuel.length - 1];
+                const kmDiff = km - lastEntry.km;
+                if (kmDiff > 0 && lastEntry.liters > 0) {
+                    mileage = kmDiff / lastEntry.liters;
+                }
+            }
+
+            const entry = {
+                id: generateId(),
+                type: 'fuel',
+                km,
+                liters,
+                pricePerLiter: pricePerLiter || (total / liters),
+                total,
+                mileage,
+                date: new Date().toISOString()
+            };
+
+            data.fuel.push(entry);
+            saveData(data);
+            
+            // Clear form
+            document.getElementById('fuelKm').value = '';
+            document.getElementById('fuelLiters').value = '';
+            document.getElementById('fuelPrice').value = '';
+            document.getElementById('fuelTotal').value = '';
+
+            renderAll();
+        }
+
+        function addExpenseEntry() {
+            const category = document.getElementById('expenseCategory').value;
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const km = parseInt(document.getElementById('expenseKm').value) || undefined;
+            const description = document.getElementById('expenseDesc').value;
+
+            if (!amount) {
+                alert('Please enter amount');
+                return;
+            }
+
+            const data = getData();
+            const entry = {
+                id: generateId(),
+                type: 'expense',
+                category,
+                amount,
+                km,
+                description,
+                date: new Date().toISOString()
+            };
+
+            data.expense.push(entry);
+            saveData(data);
+
+            // Clear form
+            document.getElementById('expenseAmount').value = '';
+            document.getElementById('expenseKm').value = '';
+            document.getElementById('expenseDesc').value = '';
+
+            renderAll();
+        }
+
+        function addComplaintEntry() {
+            const priority = document.getElementById('complaintPriority').value;
+            const km = parseInt(document.getElementById('complaintKm').value) || undefined;
+            const note = document.getElementById('complaintNote').value;
+
+            if (!note) {
+                alert('Please enter a note');
+                return;
+            }
+
+            const data = getData();
+            const entry = {
+                id: generateId(),
+                type: 'complaint',
+                priority,
+                km,
+                note,
+                date: new Date().toISOString()
+            };
+
+            data.complaint.push(entry);
+            saveData(data);
+
+            // Clear form
+            document.getElementById('complaintKm').value = '';
+            document.getElementById('complaintNote').value = '';
+
+            renderAll();
+        }
+
+        function deleteEntry(type, id) {
+            if (!confirm('Delete this entry?')) return;
+            
+            const data = getData();
+            data[type] = data[type].filter(e => e.id !== id);
+            saveData(data);
+            renderAll();
+        }
+
+        // Render Functions
+        function renderFuelList() {
+            const data = getData();
+            const list = document.getElementById('fuelList');
+            
+            if (data.fuel.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <span>⛽</span>
+                        <p>No fuel entries yet.<br>Add your first fill-up above!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = [...data.fuel].reverse().map(entry => `
+                <div class="entry-card fuel">
+                    <div class="entry-header">
+                        <span class="entry-type">Fuel</span>
+                        <span class="entry-date">${formatDate(entry.date)}</span>
+                    </div>
+                    <div class="entry-main">${formatCurrency(entry.total)}</div>
+                    <div class="entry-details">
+                        ${entry.km.toLocaleString()} km • ${entry.liters}L @ ₹${entry.pricePerLiter?.toFixed(2) || '--'}/L
+                        ${entry.mileage > 0 ? `• <strong>${entry.mileage.toFixed(1)} km/L</strong>` : ''}
+                    </div>
+                    <button class="entry-delete" onclick="deleteEntry('fuel', '${entry.id}')">🗑</button>
+                </div>
+            `).join('');
+        }
+
+        function renderExpenseList() {
+            const data = getData();
+            const list = document.getElementById('expenseList');
+            
+            const categoryIcons = {
+                service: '🔧',
+                repair: '🛠️',
+                insurance: '📋',
+                tax: '📄',
+                accessories: '🎨',
+                parking: '🅿️',
+                other: '📦'
+            };
+
+            if (data.expense.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <span>💰</span>
+                        <p>No expenses recorded.<br>Track your car expenses here!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = [...data.expense].reverse().map(entry => `
+                <div class="entry-card expense">
+                    <div class="entry-header">
+                        <span class="entry-type">${categoryIcons[entry.category]} ${entry.category}</span>
+                        <span class="entry-date">${formatDate(entry.date)}</span>
+                    </div>
+                    <div class="entry-main">${formatCurrency(entry.amount)}</div>
+                    <div class="entry-details">
+                        ${entry.km ? entry.km.toLocaleString() + ' km' : 'No KM recorded'}
+                        ${entry.description ? ' • ' + entry.description : ''}
+                    </div>
+                    <button class="entry-delete" onclick="deleteEntry('expense', '${entry.id}')">🗑</button>
+                </div>
+            `).join('');
+        }
+
+        function renderComplaintList() {
+            const data = getData();
+            const list = document.getElementById('complaintList');
+            
+            const priorityIcons = {
+                low: '🟢',
+                medium: '🟡',
+                high: '🔴'
+            };
+
+            if (data.complaint.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <span>📝</span>
+                        <p>No notes or complaints.<br>Record issues to remember for service!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = [...data.complaint].reverse().map(entry => `
+                <div class="entry-card complaint">
+                    <div class="entry-header">
+                        <span class="entry-type">${priorityIcons[entry.priority]} ${entry.priority}</span>
+                        <span class="entry-date">${formatDate(entry.date)}</span>
+                    </div>
+                    <div class="entry-main">${entry.km ? entry.km.toLocaleString() + ' km' : 'Note'}</div>
+                    <div class="entry-note">${entry.note}</div>
+                    <button class="entry-delete" onclick="deleteEntry('complaint', '${entry.id}')">🗑</button>
+                </div>
+            `).join('');
+        }
+
+        function renderAllList() {
+            const data = getData();
+            const list = document.getElementById('allList');
+            
+            const allEntries = [
+                ...data.fuel.map(e => ({ ...e, sortDate: new Date(e.date) })),
+                ...data.expense.map(e => ({ ...e, sortDate: new Date(e.date) })),
+                ...data.complaint.map(e => ({ ...e, sortDate: new Date(e.date) }))
+            ].sort((a, b) => b.sortDate - a.sortDate);
+
+            if (allEntries.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <span>📊</span>
+                        <p>No entries yet.<br>Start tracking your car!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const priorityIcons = { low: '🟢', medium: '🟡', high: '🔴' };
+            const categoryIcons = {
+                service: '🔧', repair: '🛠️', insurance: '📋',
+                tax: '📄', accessories: '🎨', parking: '🅿️', other: '📦'
+            };
+
+            list.innerHTML = allEntries.map(entry => {
+                if (entry.type === 'fuel') {
+                    return `
+                        <div class="entry-card fuel">
+                            <div class="entry-header">
+                                <span class="entry-type">⛽ Fuel</span>
+                                <span class="entry-date">${formatDate(entry.date)}</span>
+                            </div>
+                            <div class="entry-main">${formatCurrency(entry.total)}</div>
+                            <div class="entry-details">${entry.km.toLocaleString()} km • ${entry.liters}L</div>
+                        </div>
+                    `;
+                } else if (entry.type === 'expense') {
+                    return `
+                        <div class="entry-card expense">
+                            <div class="entry-header">
+                                <span class="entry-type">${categoryIcons[entry.category]} ${entry.category}</span>
+                                <span class="entry-date">${formatDate(entry.date)}</span>
+                            </div>
+                            <div class="entry-main">${formatCurrency(entry.amount)}</div>
+                            <div class="entry-details">${entry.description || 'No description'}</div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="entry-card complaint">
+                            <div class="entry-header">
+                                <span class="entry-type">${priorityIcons[entry.priority]} Note</span>
+                                <span class="entry-date">${formatDate(entry.date)}</span>
+                            </div>
+                            <div class="entry-note">${entry.note}</div>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+
+        function updateStats() {
+            const data = getData();
+            
+            // Last KM
+            const allKms = [
+                ...data.fuel.map(e => e.km),
+                ...data.expense.filter(e => e.km).map(e => e.km),
+                ...data.complaint.filter(e => e.km).map(e => e.km)
+            ];
+            const lastKm = allKms.length > 0 ? Math.max(...allKms) : 0;
+            document.getElementById('lastKm').textContent = lastKm ? lastKm.toLocaleString() : '--';
+
+            // Average Mileage
+            const mileages = data.fuel.filter(e => e.mileage > 0).map(e => e.mileage);
+            const avgMileage = mileages.length > 0 
+                ? (mileages.reduce((a, b) => a + b, 0) / mileages.length).toFixed(1)
+                : '--';
+            document.getElementById('avgMileage').textContent = avgMileage + ' km/L';
+
+            // Total Spent
+            const fuelTotal = data.fuel.reduce((sum, e) => sum + e.total, 0);
+            const expenseTotal = data.expense.reduce((sum, e) => sum + e.amount, 0);
+            const totalSpent = fuelTotal + expenseTotal;
+            document.getElementById('totalSpent').textContent = formatCurrency(totalSpent);
+
+            // Summary section
+            document.getElementById('sumFuel').textContent = formatCurrency(fuelTotal);
+            document.getElementById('sumOther').textContent = formatCurrency(expenseTotal);
+            document.getElementById('sumTotal').textContent = formatCurrency(totalSpent);
+        }
+
+        function renderAll() {
+            renderFuelList();
+            renderExpenseList();
+            renderComplaintList();
+            renderAllList();
+            updateStats();
+        }
+
+        // PWA Install
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').classList.add('show');
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    deferredPrompt = null;
+                    document.getElementById('installBanner').classList.remove('show');
+                });
+            }
+        }
+
+        function dismissInstall() {
+            document.getElementById('installBanner').classList.remove('show');
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {
+                    console.log('Service worker not available');
+                });
+            });
+        }
+
+        // Initialize
+        renderAll();
+    </script>
+</body>
+</html>
